@@ -21,12 +21,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/profile', Profile::class)->name('settings.profile');
     Route::get('settings/password', Password::class)->name('settings.password');
     Route::get('settings/appearance', Appearance::class)->name('settings.appearance');
-
-    Route::get('user/{username}', [DonationController::class, 'index'])->name('donationform.username');
-    Route::post('/donate', [DonationController::class, 'store'])->name('donation.store');
-    Route::get('/donation/success', function () {
-        return view('donation-success');
-    })->name('donation.success');
 });
+Route::get('user/{username}', [DonationController::class, 'index'])->name('donationform.username');
+Route::post('/donate', [DonationController::class, 'store'])->name('donation.store');
+Route::get('/donation/{id}/success', [DonationController::class, 'success'])->name('donation.success');
 
 require __DIR__ . '/auth.php';

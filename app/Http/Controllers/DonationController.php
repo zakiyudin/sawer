@@ -72,4 +72,39 @@ class DonationController extends Controller
             return back()->with('error', 'failed to create donation');
         }
     }
+
+    public function callbackXendit(Request $request)
+    {
+        $getToken = $request->header('x-callback-token');
+        $callbackToken = env('XENDIT_CALLBACK_TOKEN');
+
+        if (!$callbackToken || $getToken !== $callbackToken) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
+        $payment = Payment::where('payment_id', $request->id)->first();
+
+        if (!$payment) {
+            return response()->json(['message' => 'Payment not found'], 400);
+        }
+
+        $payment->update([
+            'status' => $request->status === 'PAID' ? 'completed' : 'failed'
+        ]);
+
+        if ($request->status === 'PAID') {
+            $donation = Donation::find($payment->donation_id);
+            $donation->update([
+                'status' => 'completed'
+            ]);
+        }
+
+        return response()->json(['message' => 'Payment updated']);
+    }
+
+    public function success($id)
+    {
+        $donation = Donation::find($id);
+        return view('success', compact('donation'));
+    }
 }
